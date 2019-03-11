@@ -1,0 +1,10 @@
+1. halka etrafýna fast gauss ve gama düzeltmeli yapýlacak
+2. çarpýlýrken nesne diffuse için de gamma yapýlýrsa daha canlý renk veriyor
+3. ardýndan Blue için rgb curve saða ortadan çekilirse turuncuya çalýp  gerçeðe benziyor
+
+Box blur için adýmlar:
+1. gamma correct 
+2. box blur 24 24 3
+3. gamma correct
+4. box blur 84 84 3
+5. gamma correct

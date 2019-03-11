@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - FBX loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+		<style>
+
+    body {
+				margin: 0px;
+				background-color: #000;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				margin: 0px;
+				text-align:center;
+				overflow: hidden;
+			}
+
+			a { color: #88f; }
+
+
+    </style>
+	</head>
+
+	<body onkeypress="myFunction()">
+		<div id="container">
+		<div id="main">
+			<div id="result">
+			<h3>Output</h3>
+			<canvas id="output" width="540" height="960"></canvas>
+			<p id="timer"></p>
+			</div><!--/result-->
+</div><!--/main-->
+
+		</div>
+
+		<script src="js/three.js"></script>
+
+		<script src="js/libs/inflate.min.js"></script>
+		<script src="js/loaders/FBXLoader.js"></script>
+
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		<script src="js/shaders/CopyShader.js"></script>
+		<script src="js/shaders/PixelShader.js"></script>
+		<script src="js/shaders/FastGaussBlur.js"></script>
+		<script src="js/shaders/ShowAlpha.js"></script>
+		<script src="js/shaders/SetAlpha.js"></script>
+		<script src="js/shaders/AlphaOver.js"></script>
+		<script src="js/shaders/InpaintShaderFilter.js"></script>
+		<script src="js/shaders/MultiplyShader.js"></script>
+		<script src="js/shaders/HorizontalBlurShader5.js"></script>
+		<script src="js/shaders/VerticalBlurShader.js"></script>
+		<script src="js/shaders/GammaCorrect.js"></script>
+		<script src="js/shaders/GammaUncorrect.js"></script>
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/ClearPass.js"></script>
+		<script src="js/postprocessing/TexturePass.js"></script>
+		<script src="js/controls/TrackballControls.js"></script>
+		<script src='js/libs/dat.gui.min.js'></script>
+		<script src='js/imagefilters_min.js'></script>
+
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var container, stats, controls;
+			var camera, scene, renderer, light, composer;
+			var clearPass, texturePass, texturePass2, renderPass, inpaintPass, alphaPass, horizBlurPass;
+			var diffuseMap,	halkaIciMask, halkaMask, difColorSource ; //kaynak resimler
+			var composerDifColorNesne, composerDifColorSahne;  //composers
+			//render targets
+			var  difColorNesne, difColorSahne;
+
+			var camtarget; // kamerayı doğru yöneltmek için
+
+			var clock = new THREE.Clock();
+			var renderWidth  = 540;
+			var renderHeight = 960;
+
+			var nesneMesh; //render alınacak havlu nesnesi
+			var nesneBeyazMaterial = new THREE.MeshBasicMaterial( { color: 0xFFFFFF });
+			var gui;
+			var params = {
+
+				clearPass: true,
+				clearColor: 'black',
+				clearAlpha: 0.0,
+
+				renderPass: true,
+				inpaintPass: true,
+				alphaShowPass: false,
+				horizBlurPass: true
+
+			};
+
+			var clock = new THREE.Clock();
+			init();
+			clearGui();
+			//animate();
+			//render2();
+			function GausBlurCanvasByRenderTarget(renderTarget)
+			{
+				alert('render texture ' + renderTarget);
+				return;
+				var genislik = 60;
+				args = [  genislik, genislik, 5 ];
+				args.unshift(canvasImage);
+				var result = ImageFilters['BoxBlur'].apply(ImageFilters, args);
+				args = [  2.0 ];
+				args.unshift(result);
+				result = ImageFilters['Gamma'].apply(ImageFilters, args);
+				args = [  genislik, genislik, 5 ];
+				args.unshift(result);
+				result = ImageFilters['BoxBlur'].apply(ImageFilters, args);
+				args = [  2.0 ];
+				args.unshift(result);
+				result = ImageFilters['Gamma'].apply(ImageFilters, args);
+
+				context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+				outContext = document.getElementById("output");
+				try {
+					outContext.putImageData(result, 0, 0);
+				}
+				catch (e) {
+					alert(e);
+				}
+			}
+			function GausBlurCanvas()
+			{
+				canvas1 = renderer.domElement;
+alert('canvas1 ' + 		canvas1.height);
+				var start_time = new Date().getTime();
+				context = renderer.getContext('webgl');
+alert( 'context ' + context );
+				canvasImage = context.createTexture();
+				alert( 'canvasImage ' + canvasImage );
+				context.copyTexImage2D( canvasImage,0, context.RGBA,0,0, canvas1.width, canvas1.height,0);
+				alert( 'sonra canvasImage ' + canvasImage );
+				var genislik = 60;
+				args = [  genislik, genislik, 5 ];
+				args.unshift(canvasImage);
+				var result = ImageFilters['BoxBlur'].apply(ImageFilters, args);
+				args = [  2.0 ];
+				args.unshift(result);
+				result = ImageFilters['Gamma'].apply(ImageFilters, args);
+				args = [  genislik, genislik, 5 ];
+				args.unshift(result);
+				result = ImageFilters['BoxBlur'].apply(ImageFilters, args);
+				args = [  2.0 ];
+				args.unshift(result);
+				result = ImageFilters['Gamma'].apply(ImageFilters, args);
+
+				context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+				outContext = document.getElementById("output");
+				try {
+					outContext.putImageData(result, 0, 0);
+				}
+				catch (e) {
+					alert(e);
+				}
+			}
+
+
+			function clearGui() {
+
+				if ( gui ) gui.destroy();
+
+				gui = new dat.GUI();
+
+				gui.add( params, "clearPass" );
+				gui.add( params, "clearColor", [ 'black', 'white', 'blue', 'green', 'red' ] );
+				gui.add( params, "clearAlpha", 0, 1 );
+
+				gui.add( params, "renderPass" );
+				gui.add( params, "inpaintPass" );
+				gui.add( params, "alphaShowPass" );
+				gui.add( params, "horizBlurPass" );
+
+				//gui.add( params, "autoRotate" );
+
+				//gui.add( params, 'camera', [ 'perspective', 'orthographic' ] );
+
+				gui.open();
+
+			}
+
+
+			function myFunction() {
+				alert('camera position ' + camera.position.x + '  ' + camera.position.y + '  ' + camera.position.z + '\nmesh position ' +nesneMesh.position.x + '  ' + nesneMesh.position.y + '  ' + nesneMesh.position.z  );
+				alert('camera rotation ' +camera.rotation.x + '  ' + camera.rotation.y + '  ' + camera.rotation.z + '  ' );
+				alert('near ' +camera.near +' far ' + camera.far + ' fov ' + camera.fov);
+				alert('efective fov ' + camera.getEffectiveFOV ());
+				camera.fov = 49.134;
+				camera.updateProjectionMatrix () ;
+			}
+
+			function getHorizontalBlur(length)			{
+				horizBlurShader = THREE.HorizontalBlurShader;
+				horizBlurShader.uniforms.h.value = 1.0 / length;
+				return new THREE.ShaderPass(horizBlurShader);
+			}
+
+			function getVerticalBlur(length)			{
+				//verticalBlurShader = THREE.VerticalBlurShader;
+				verticalBlurShader = THREE.HorizontalBlurShader;
+				verticalBlurShader.uniforms.v.value = 1.0 / length;
+				return new THREE.ShaderPass(verticalBlurShader);
+			}
+
+			function getInpaintPass()			{
+				var inpaintShader = THREE.InpaintShader;
+				inpaintShader.uniforms.w.value = renderWidth;
+				inpaintShader.uniforms.h.value = renderHeight;
+				inpaintMaterial = new THREE.ShaderMaterial( {
+				uniforms: inpaintShader.uniforms,
+				vertexShader: inpaintShader.vertexShader,
+				fragmentShader: inpaintShader.fragmentShader
+				} );
+
+				inpaintMaterial.uniforms.tMask.value = halkaMask;
+
+				return new THREE.ShaderPass(inpaintMaterial);
+			}
+
+			function getDifColorHalkaPass()			{
+					//dif colors multiply aşaması
+					var multiplyDifColorHalkaShader = THREE.MultiplyShader;
+					multiplyDifColorHalkaShader.uniforms.useBlendAlpha.value = false;
+					multiplyDifColorHalkaShader.uniforms.tBase.value = halkaMask;
+
+					multiplyDifColorHalkaMaterial = new THREE.ShaderMaterial( {
+						uniforms		: multiplyDifColorHalkaShader.uniforms,
+						vertexShader	: multiplyDifColorHalkaShader.vertexShader,
+						fragmentShader	: multiplyDifColorHalkaShader.fragmentShader
+
+					} );
+
+				  return new THREE.ShaderPass(multiplyDifColorHalkaMaterial);
+
+			}
+
+			function getDifColorsMultiplyPass()			{
+				//multiply shader
+				//dif colors multiply aşaması
+				var multiplyDifColorsShader = THREE.MultiplyShader;
+				multiplyDifColorsShader.uniforms.useBlendAlpha.value = true;
+				multiplyDifColorsShader.uniforms.tBase.value = difColorSource;
+
+				multiplyDifColorsShaderMaterial = new THREE.ShaderMaterial( {
+					uniforms: multiplyDifColorsShader.uniforms,
+					vertexShader: multiplyDifColorsShader.vertexShader,
+					fragmentShader: multiplyDifColorsShader.fragmentShader
+
+				} );
+
+			  return new THREE.ShaderPass(multiplyDifColorsShaderMaterial);
+
+			}
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene = new THREE.Scene();
+
+
+				var light = new THREE.AmbientLight( 0x000000 );
+				scene.add( light );
+				var rtParameters = {
+					minFilter: THREE.LinearFilter,
+					magFilter: THREE.LinearFilter,
+					format: THREE.RGBAFormat,
+					stencilBuffer: true
+				};
+			
+				//desen ekle
+				var texLoader 		= new THREE.TextureLoader();
+				diffuseMap 			= texLoader.load( 'textures/modafabrikornekdesen.png');
+				difColorSource 		= texLoader.load( "textures/composites/difColor.png");
+				halkaMask 			= texLoader.load( 'textures/masks/halka.png');
+				// model
+				var loader = new THREE.FBXLoader();
+				loader.load( 'havlu_modafabrikblend5Y+Z.fbx', function ( object ) {
+
+					//alert("object scale" + object.scale.x);
+
+					object.traverse( function ( child ) {
+						if ( child.isMesh ) {
+							child.material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
+
+							child.castShadow = false;
+							child.receiveShadow = false;
+							child.material.map = diffuseMap;
+
+							nesneMesh = child;
+							//alert("nesneMesh scale" + nesneMesh.scale.x);
+
+						}
+						else if(child.isCamera)
+						{
+							camera = child;
+						}
+						else if(child.name == "camtarget")
+						{
+							//alert(child.name);
+							camtarget = child.position;
+						}
+
+					} );
+
+					scene.add( object );
+
+					camera.fov = 49.134;
+					camera.lookAt(camtarget);
+					camera.updateProjectionMatrix () ;
+
+
+					renderer = new THREE.WebGLRenderer( {antialias: true, premultipliedAlpha:false} );
+					renderer.setPixelRatio( camera.aspect);
+					renderer.setSize( renderWidth ,renderHeight  );
+
+					renderer.shadowMap.enabled = false;
+					//container.appendChild( renderer.domElement );
+
+//dif color nesne hesaplama aşaması
+					difColorNesne = new THREE.WebGLRenderTarget( renderWidth, renderHeight, {format: THREE.RGBAFormat,antialias: true, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter} );
+					composerDifColorNesne = new THREE.EffectComposer( renderer, difColorNesne );
+					alert('composerDifColorNesne ' + composerDifColorNesne);
+					clearPass = new THREE.ClearPass( params.clearColor, params.clearAlpha );
+					composerDifColorNesne.addPass( clearPass );
+
+					renderPass = new THREE.RenderPass( scene, camera );
+					renderPass.clear = false;
+					composerDifColorNesne.addPass( renderPass );
+
+				//tüyler oluşturulur
+					inpaintPass = getInpaintPass();
+					composerDifColorNesne.addPass( inpaintPass );
+				//-----------------------------
+
+				// renkli halka oluşturulur
+					multiplyHalkaPass = getDifColorHalkaPass();
+					composerDifColorNesne.addPass(multiplyHalkaPass);
+				//---------------------------------
+
+				//gaus için
+					composerDifColorNesne.addPass(new THREE.ShaderPass(THREE.GammaCorrect));
+					composerDifColorNesne.addPass(new THREE.ShaderPass(THREE.GammaCorrect));
+
+
+
+					//composerDifColorNesne.addPass(new THREE.ShaderPass( THREE.GammaUncorrect));
+				//
+			/*	//havlu nesnesi ve arka zemin birleştirilir
+				    multiplyDifColorsPass = getDifColorsMultiplyPass();
+				    composerDifColorNesne.addPass( multiplyDifColorsPass );
+			  //---------------------
+				*/
+				//Alfa gösterme, doğruluk testi amaçlı
+					alphaPass = new THREE.ShaderPass( THREE.ShowAlpha );
+					composerDifColorNesne.addPass( alphaPass );
+				//---------------------
+
+					var copyPass = new THREE.ShaderPass( THREE.CopyShader );
+					copyPass.renderToScreen = true;
+					composerDifColorNesne.addPass( copyPass );
+
+
+
+					composerDifColorNesne.render(0.01);
+					GausBlurCanvasByRenderTarget(difColorNesne);
+
+//--------------------------------------------
+					/*
+					var delta = clock.getDelta();
+					composerDifColorNesne.render(delta);
+//sahne dif color kompozisyonu aşaması
+					difColorSahne 					= new THREE.WebGLRenderTarget( renderWidth, renderHeight, {format: THREE.RGBAFormat,antialias: true, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter} );
+					composerDifColorSahne 			= new THREE.EffectComposer( renderer, difColorSahne );
+					texturePassDifColorNesne 		= new THREE.TexturePass(composerDifColorNesne.renderTarget2.texture);
+
+					composerDifColorSahne.addPass( texturePassDifColorNesne );
+
+					//kaynak diff color yüklenir
+					difColorSource = 	textureLoader.load( "textures/composites/difColor.png");
+
+					//dif colors multiply aşaması
+					var multiplyDifColorsShader = THREE.MultiplyShader;
+					multiplyDifColorsShader.uniforms.useBlendAlpha.value = true;
+					multiplyDifColorsShader.uniforms.tBase.value = difColorSource;
+
+					multiplyDifColorsShaderMaterial = new THREE.ShaderMaterial( {
+						uniforms: multiplyDifColorsShader.uniforms,
+						vertexShader: multiplyDifColorsShader.vertexShader,
+						fragmentShader: multiplyDifColorsShader.fragmentShader
+
+					} );
+
+				   multiplyDifColorsPass = new THREE.ShaderPass(multiplyDifColorsShaderMaterial);
+				   multiplyDifColorsPass.renderToScreen = true;
+				   composerDifColorSahne.addPass( multiplyDifColorsPass );
+
+				   var copyPass2 = new THREE.ShaderPass( THREE.CopyShader );
+				   copyPass2.renderToScreen = true;
+				   composerDifColorSahne.addPass( copyPass2 );
+
+//-----------------------
+
+				   texturePassDifColorNesne.uniforms[ "tDiffuse" ].value = composerDifColorNesne.renderTarget2.texture;
+
+					delta = clock.getDelta();
+					composerDifColorSahne.render(delta);
+					*/
+				} );
+
+
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// stats
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+
+			}
+			function render2()
+			{
+				var delta = clock.getDelta();
+				alert('render içinde composerDifColorNesne ' + composerDifColorNesne);
+				composerDifColorNesne.render(0.01);
+				alert('hey');
+				GausBlurCanvas();
+				//composerDifColorSahne.render(delta);
+			}
+			function onWindowResize() {
+/*
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+*/
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				//camera.updateMatrixWorld( true );
+
+				var newColor = 0x000000;// clearPass.clearColor;
+
+				switch( params.clearColor ) {
+					case 'blue': newColor = 0x0000ff; break;
+					case 'red': newColor = 0xff0000; break;
+					case 'green': newColor = 0x00ff00; break;
+					case 'white': newColor = 0xffffff; break;
+					case 'black': newColor = 0x000000; break;
+				}
+				try {
+					clearPass.enabled = params.clearPass;
+					clearPass.clearColor = newColor;
+					clearPass.clearAlpha = params.clearAlpha;
+
+					renderPass.enabled = params.renderPass;
+					inpaintPass.enabled = params.inpaintPass;
+					alphaPass.enabled = params.alphaShowPass;
+					horizBlurPass.enabled = params.horizBlurPass;
+
+				}
+				catch(err) {
+					//document.getElementById("demo").innerHTML = err.message;
+				}
+
+				//composerDifColorNesne.render();
+				//composerDifColorSahne.render();
+				render();
+
+			}
+
+		</script>
+
+	</body>
+</html>

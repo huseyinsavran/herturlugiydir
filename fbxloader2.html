@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - FBX loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+		<style>
+
+    body {
+				margin: 0px;
+				background-color: #000;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				margin: 0px;
+				text-align:center;
+				overflow: hidden;
+			}
+
+			a { color: #88f; }
+
+
+    </style>
+	</head>
+
+	<body onkeypress="myFunction()">
+		<div id="container"></div>
+
+		<script src="js/three.js"></script>
+
+		<script src="js/libs/inflate.min.js"></script>
+		<script src="js/loaders/FBXLoader.js"></script>
+
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+		<script src="js/shaders/CopyShader.js"></script>
+		<script src="js/shaders/PixelShader.js"></script>
+		<script src="js/shaders/FastGaussBlur.js"></script>
+		<script src="js/shaders/HorizontalBlurShader.js"></script>
+		<script src="js/shaders/ShowAlpha.js"></script>
+		<script src="js/shaders/SetAlpha.js"></script>
+		<script src="js/shaders/AlphaOver.js"></script>
+		<script src="js/shaders/InpaintShaderFilter.js"></script>
+		<script src="js/postprocessing/EffectComposer.js"></script>
+		<script src="js/postprocessing/RenderPass.js"></script>
+		<script src="js/postprocessing/ShaderPass.js"></script>
+		<script src="js/postprocessing/ClearPass.js"></script>
+		<script src="js/postprocessing/TexturePass.js"></script>
+		<script src="js/controls/TrackballControls.js"></script>
+		<script src='js/libs/dat.gui.min.js'></script>
+		<script src="js/materials/ShaderMaterial.js"></script>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var container, stats, controls;
+			var camera, scene, renderer, light, composer;
+			var clearPass, texturePass, texturePass2, renderPass, inpaintPass, alphaPass;
+			var diffuseMap,	halkaIciMask, gercekMask;
+
+			//render targets
+			var  diffColor;
+
+			var camtarget; // kameray� do�ru y�neltmek i�in
+
+			var clock = new THREE.Clock();
+			var renderWidth  = 540;
+			var renderHeight = 960;
+
+			var nesneMesh; //render al�nacak havlu nesnesi
+			var nesneBeyazMaterial = new THREE.MeshBasicMaterial( { color: 0xFFFFFF });
+			var gui;
+			var params = {
+
+				clearPass: true,
+				clearColor: 'black',
+				clearAlpha: 0.0,
+
+				texturePass: false,
+				texturePassOpacity: 0.0,
+
+				texturePass2: false,
+				texturePass2Opacity: 0.0,
+
+				renderPass: true,
+				inpaintPass: false,
+				alphaShowPass: false
+
+				//autoRotate: true,
+
+				//camera: 'perspective'
+
+			};
+
+			init();
+			clearGui();
+			animate();
+
+
+
+			function clearGui() {
+
+				if ( gui ) gui.destroy();
+
+				gui = new dat.GUI();
+
+				gui.add( params, "clearPass" );
+				gui.add( params, "clearColor", [ 'black', 'white', 'blue', 'green', 'red' ] );
+				gui.add( params, "clearAlpha", 0, 1 );
+
+				gui.add( params, "texturePass" );
+				gui.add( params, "texturePassOpacity", 0, 1 );
+
+				gui.add( params, "texturePass2" );
+				gui.add( params, "texturePass2Opacity", 0, 1 );
+
+				gui.add( params, "renderPass" );
+				gui.add( params, "inpaintPass" );
+				gui.add( params, "alphaShowPass" );
+
+				//gui.add( params, "autoRotate" );
+
+				//gui.add( params, 'camera', [ 'perspective', 'orthographic' ] );
+
+				gui.open();
+
+			}
+
+
+			function myFunction() {
+				alert('camera position ' + camera.position.x + '  ' + camera.position.y + '  ' + camera.position.z + '\nmesh position ' +nesneMesh.position.x + '  ' + nesneMesh.position.y + '  ' + nesneMesh.position.z  );
+				alert('camera rotation ' +camera.rotation.x + '  ' + camera.rotation.y + '  ' + camera.rotation.z + '  ' );
+				alert('near ' +camera.near +' far ' + camera.far + ' fov ' + camera.fov);
+				alert('efective fov ' + camera.getEffectiveFOV ());
+				camera.fov = 49.134;
+				camera.updateProjectionMatrix () ;
+			}
+
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene = new THREE.Scene();
+
+
+				var light = new THREE.AmbientLight( 0x000000 );
+				scene.add( light );
+
+
+				//desen ekle
+				var texLoader = new THREE.TextureLoader();
+				diffuseMap = texLoader.load( 'textures/modafabrikornekdesen.png');/*, function( map ) {
+						alert('hadi');
+						nesneMesh.material.map = map;
+					});				*/
+				//halkaIciMask = texLoader.load( 'textures/masks/halkaIc.png' );
+
+
+				// model
+				var loader = new THREE.FBXLoader();
+				loader.load( 'havlu_modafabrikblend5Y+Z.fbx', function ( object ) {
+
+					//alert("object scale" + object.scale.x);
+
+					object.traverse( function ( child ) {
+						if ( child.isMesh ) {
+							child.material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
+
+							child.castShadow = false;
+							child.receiveShadow = false;
+							child.material.map = diffuseMap;
+
+							nesneMesh = child;
+							//alert("nesneMesh scale" + nesneMesh.scale.x);
+
+						}
+						else if(child.isCamera)
+						{
+
+							camera = child;
+
+						}
+						else if(child.name == "camtarget")
+						{
+							//alert(child.name);
+							camtarget = child.position;
+						}
+
+					} );
+
+					scene.add( object );
+
+					camera.fov = 49.134;
+					camera.lookAt(camtarget);
+					camera.updateProjectionMatrix () ;
+
+
+					renderer = new THREE.WebGLRenderer( {antialias: true, premultipliedAlpha:false} );
+					renderer.setPixelRatio( camera.aspect);
+					renderer.setSize( renderWidth ,renderHeight  );
+
+
+
+					//mask color ama�l� kullan�lacak
+					colorAlphaMask = new THREE.WebGLRenderTarget( renderWidth, renderHeight, {format: THREE.RGBAFormat,antialias: true, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter} );
+					var oldmaterial = nesneMesh.material; //orijinal malzeme yedeklenir
+					//beyaz malzeme ile alfa ��kar�lacak
+					nesneMesh.material = nesneBeyazMaterial;
+					//render to mask
+					//renderer.render(scene, camera, colorAlphaMask);
+
+					//renk malzemesi geri y�klenir
+					nesneMesh.material = oldmaterial;
+
+					//colorMask = new THREE.WebGLRenderTarget( renderWidth, renderHeight, {format: THREE.RGBAFormat,antialias: true, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter} );
+					//scene.background = new THREE.Color( 0x00ff00 );
+
+
+					diffColor = new THREE.WebGLRenderTarget( renderWidth, renderHeight, {format: THREE.RGBAFormat,antialias: true, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter} );
+					composer = new THREE.EffectComposer( renderer, diffColor );
+
+					clearPass = new THREE.ClearPass( params.clearColor, params.clearAlpha );
+					composer.addPass( clearPass );
+
+					texturePass = new THREE.TexturePass();
+					composer.addPass( texturePass );
+
+					var textureLoader = new THREE.TextureLoader();
+					/*textureLoader.load( "textures/hardwood2_diffuse.jpg", function( map ) {
+						texturePass.map = map;
+					});*/
+					textureLoader.load( "textures/masks/halka.png", function( map ) {
+						texturePass.map = map;
+					});
+
+					texturePass2 = new THREE.TexturePass( );
+					composer.addPass( texturePass2 );
+					textureLoader.load( "textures/758px-Canestra_di_frutta_(Caravaggio).jpg", function( map ) {
+						texturePass2.map = map;
+					});
+
+					renderPass = new THREE.RenderPass( scene, camera );
+					renderPass.clear = false;
+					composer.addPass( renderPass );
+
+					var inpaintShader = THREE.InpaintShader;
+					inpaintShader.uniforms.w.value = renderWidth;
+					inpaintShader.uniforms.h.value = renderHeight;
+					inpaintMaterial = new THREE.ShaderMaterial( {
+						uniforms: inpaintShader.uniforms,
+						vertexShader: inpaintShader.vertexShader,
+						fragmentShader: inpaintShader.fragmentShader
+
+					} );
+
+					gercekMask = texLoader.load( 'textures/masks/gercek.png', function( map ) {
+
+						inpaintMaterial.uniforms.tMask.value = map;
+
+					});
+
+					inpaintPass = new THREE.ShaderPass(inpaintMaterial);
+					composer.addPass( inpaintPass );
+
+
+					alphaPass = new THREE.ShaderPass( THREE.ShowAlpha );
+					composer.addPass( alphaPass );
+
+					var copyPass = new THREE.ShaderPass( THREE.CopyShader );
+					copyPass.renderToScreen = true;
+					composer.addPass( copyPass );
+
+					renderer.shadowMap.enabled = false;
+					container.appendChild( renderer.domElement );
+
+
+				/*
+
+					setAlphaPAss = new THREE.ShaderPass(THREE.SetAlpha);
+					setAlphaPAss.uniforms.tAlphaMask.value = gercekMask;
+					composer.addPass( setAlphaPAss );
+
+					overAlphaPAss = new THREE.ShaderPass(THREE.AlphaOver);
+					overAlphaPAss.uniforms.tZemin.value = gercekMask;
+					composer.addPass( overAlphaPAss );
+			*/
+				/*
+					inpaintPass = new THREE.ShaderPass(THREE.InpaintShader);
+					inpaintPass.uniforms.tMask.value = gercekMask;
+					inpaintPass.uniforms.w.value = renderWidth;
+					inpaintPass.uniforms.h.value = renderHeight;
+					composer.addPass( inpaintPass );
+			*/
+		/*
+
+					alphaShow = new THREE.ShaderPass( THREE.ShowAlpha );
+					composer.addPass( alphaShow );
+
+			*/
+		/*			var outputPass   = new THREE.ShaderPass( THREE.CopyShader );
+					outputPass.renderToScreen = true;
+					composer.addPass(outputPass);
+
+			*/
+					/*
+					gausPass = new THREE.ShaderPass( THREE.FastGaussBlur );
+
+					gausPass.uniforms.resolution.value = new THREE.Vector3( 540.0, 960.0, 0.0 );
+					gausPass.uniforms.direction.value  = new THREE.Vector2( 0.0, 0.0 );
+					gausPass.renderToScreen = true;
+					composer.addPass( gausPass );
+					*/
+	/*
+					gausPass = new THREE.ShaderPass( THREE.PixelShader );
+					gausPass.uniforms.resolution.value = new THREE.Vector2( renderWidth, renderHeight );
+					gausPass.uniforms.resolution.value.multiplyScalar( camera.aspect );
+					gausPass.renderToScreen = true;
+					gausPass.uniforms.pixelSize.value = 16;
+					composer.addPass( gausPass );
+	*/
+
+
+
+				} );
+
+
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				// stats
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+
+			}
+
+			function onWindowResize() {
+/*
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+*/
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				//camera.updateMatrixWorld( true );
+
+				var newColor = clearPass.clearColor;
+
+				switch( params.clearColor ) {
+					case 'blue': newColor = 0x0000ff; break;
+					case 'red': newColor = 0xff0000; break;
+					case 'green': newColor = 0x00ff00; break;
+					case 'white': newColor = 0xffffff; break;
+					case 'black': newColor = 0x000000; break;
+				}
+
+				clearPass.enabled = params.clearPass;
+				clearPass.clearColor = newColor;
+				clearPass.clearAlpha = params.clearAlpha;
+
+				texturePass.enabled = params.texturePass;
+				texturePass.opacity = params.texturePassOpacity;
+
+				texturePass2.enabled = params.texturePass2;
+				texturePass2.opacity = params.texturePass2Opacity;
+
+				renderPass.enabled = params.renderPass;
+				inpaintPass.enabled = params.inpaintPass;
+				alphaPass.enabled = params.alphaShowPass;
+
+				composer.render();
+
+			}
+
+		</script>
+
+	</body>
+</html>

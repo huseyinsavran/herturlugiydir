@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+		<meta charset="utf-8">
+		<title>Three.js Material Browser</title>
+		<style>
+			@font-face {
+				font-family: 'inconsolata';
+				src: url('../files/inconsolata.woff') format('woff');
+				font-weight: normal;
+				font-style: normal;
+			}
+
+			body {
+				margin:0;
+				font-family: 'inconsolata';
+				font-size: 15px;
+				line-height: 18px;
+				overflow: hidden;
+			}
+
+			canvas { width: 100%; height: 100% }
+
+			#newWindow {
+				display: block;
+				position: absolute;
+				bottom: 0.3em;
+				left: 0.5em;
+				color: #fff;
+			}
+		</style>
+	<style type="text/css">.dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1!important}.dg.main .close-button.drag,.dg.main:hover .close-button{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;transition:opacity .1s linear;border:0;position:absolute;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-x:hidden}.dg.a.has-save>ul{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{position:fixed;top:0;z-index:1002}.dg li{-webkit-transition:height .1s ease-out;transition:height .1s ease-out}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;overflow:hidden;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid transparent}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .c{float:left;width:60%}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:9px}.dg .c select{margin-top:5px}.dg .cr.boolean,.dg .cr.boolean *,.dg .cr.function,.dg .cr.function *,.dg .cr.function .property-name{cursor:pointer}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco,monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px Lucida Grande,sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid hsla(0,0%,100%,.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2fa1d6}.dg .cr.number input[type=text]{color:#2fa1d6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.boolean:hover,.dg .cr.function:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2fa1d6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}</style></head>
+	<body>
+
+		<a id="newWindow" href="https://threejs.org/docs/scenes/material-browser.html#MeshBasicMaterial" target="_blank">Open in New Window</a>
+
+		<script src="js/three.min.js"></script>
+		<script src="js/libs/dat.gui.min.js"></script>
+		<script src="js/material.js"></script>
+
+		<script>
+
+			document.getElementById( 'newWindow' ).href += window.location.hash;
+
+			var gui = new dat.GUI();
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 10, 50 );
+			camera.position.z = 30;
+
+			var renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.setClearColor( 0x000000, 1 );
+			document.body.appendChild( renderer.domElement );
+
+			var ambientLight = new THREE.AmbientLight( 0x000000 );
+			scene.add( ambientLight );
+/*
+			var lights = [];
+			lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+			lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+			lights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+
+			lights[ 0 ].position.set( 0, 200, 0 );
+			lights[ 1 ].position.set( 100, 200, 100 );
+			lights[ 2 ].position.set( - 100, - 200, - 100 );
+
+			scene.add( lights[ 0 ] );
+			scene.add( lights[ 1 ] );
+			scene.add( lights[ 2 ] );
+*/
+			guiScene( gui, scene, camera );
+
+			var geometry = new THREE.TorusKnotGeometry( 10, 3, 100, 16 );
+			var mesh = new THREE.Mesh( geometry );
+
+			generateVertexColors( geometry );
+
+			mesh.material = chooseFromHash( gui, mesh, geometry );
+
+			generateMorphTargets( mesh, geometry );
+
+			scene.add( mesh );
+
+			var prevFog = false;
+
+			var render = function () {
+
+				requestAnimationFrame( render );
+
+				var time = Date.now() * 0.001;
+
+				mesh.rotation.x += 0.005;
+				mesh.rotation.y += 0.005;
+
+				if ( prevFog !== scene.fog ) {
+
+					mesh.material.needsUpdate = true;
+					prevFog = scene.fog;
+
+				}
+
+				if ( mesh.morphTargetInfluences ) {
+
+					mesh.morphTargetInfluences[ 0 ] = ( 1 + Math.sin( 4 * time ) ) / 2;
+
+				}
+
+				renderer.render( scene, camera );
+
+			};
+
+			window.addEventListener( 'resize', function () {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}, false );
+
+			render();
+
+		</script><div class="dg ac"><div class="dg main a" style="width: 245px;"><div style="width: 6px; margin-left: -3px; height: 448px; cursor: ew-resize; position: absolute;"></div><ul style="height: auto;"><li class="folder"><div class="dg"><ul class="closed"><li class="title">Scene</li><li class="cr color" style="border-left-color: rgb(0, 0, 0);"><div><span class="property-name">background</span><div class="c"><input type="text" style="outline: none; text-align: center; color: rgb(255, 255, 255); border: 0px; font-weight: bold; text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 1px; background-color: rgb(0, 0, 0);"><div class="selector" style="width: 122px; height: 102px; padding: 3px; background-color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 3px;"><div class="field-knob" style="position: absolute; width: 12px; height: 12px; border: 2px solid rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px; border-radius: 12px; z-index: 1; margin-left: -7px; margin-top: 93px; background-color: rgb(0, 0, 0);"></div><div class="saturation-field" style="width: 100px; height: 100px; border: 1px solid rgb(85, 85, 85); margin-right: 3px; display: inline-block; cursor: pointer; background: -webkit-linear-gradient(left, rgb(255, 255, 255) 0%, rgb(255, 0, 0) 100%);"><div style="width: 100%; height: 100%; background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 100%);"></div></div><div class="hue-field" style="width: 15px; height: 100px; border: 1px solid rgb(85, 85, 85); cursor: ns-resize; position: absolute; top: 3px; right: 3px; background: -webkit-linear-gradient(top, rgb(255, 0, 0) 0%, rgb(255, 0, 255) 17%, rgb(0, 0, 255) 34%, rgb(0, 255, 255) 50%, rgb(0, 255, 0) 67%, rgb(255, 255, 0) 84%, rgb(255, 0, 0) 100%);"><div class="hue-knob" style="position: absolute; width: 15px; height: 2px; border-right: 4px solid rgb(255, 255, 255); z-index: 1; margin-top: 100px;"></div></div></div></div></div></li><li class="cr color"><div><span class="property-name">ambient light</span><div class="c"><input type="text" style="outline: none; text-align: center; color: rgb(255, 255, 255); border: 0px; font-weight: bold; text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 1px; background-color: rgb(0, 0, 0);"><div class="selector" style="width: 122px; height: 102px; padding: 3px; background-color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 3px;"><div class="field-knob" style="position: absolute; width: 12px; height: 12px; border: 2px solid rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px; border-radius: 12px; z-index: 1; margin-left: -7px; margin-top: 93px; background-color: rgb(0, 0, 0);"></div><div class="saturation-field" style="width: 100px; height: 100px; border: 1px solid rgb(85, 85, 85); margin-right: 3px; display: inline-block; cursor: pointer; background: -webkit-linear-gradient(left, rgb(255, 255, 255) 0%, rgb(255, 0, 0) 100%);"><div style="width: 100%; height: 100%; background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 100%);"></div></div><div class="hue-field" style="width: 15px; height: 100px; border: 1px solid rgb(85, 85, 85); cursor: ns-resize; position: absolute; top: 3px; right: 3px; background: -webkit-linear-gradient(top, rgb(255, 0, 0) 0%, rgb(255, 0, 255) 17%, rgb(0, 0, 255) 34%, rgb(0, 255, 255) 50%, rgb(0, 255, 0) 67%, rgb(255, 255, 0) 84%, rgb(255, 0, 0) 100%);"><div class="hue-knob" style="position: absolute; width: 15px; height: 2px; border-right: 4px solid rgb(255, 255, 255); z-index: 1; margin-top: 100px;"></div></div></div></div></div></li><li class="folder"><div class="dg"><ul class="closed"><li class="title">scene.fog</li><li class="cr boolean"><div><span class="property-name">THREE.Fog()</span><div class="c"><input type="checkbox"></div></div></li><li class="cr color"><div><span class="property-name">scene.fog.color</span><div class="c"><input type="text" style="outline: none; text-align: center; color: rgb(255, 255, 255); border: 0px; font-weight: bold; text-shadow: rgba(0, 0, 0, 0.7) 0px 1px 1px; background-color: rgb(63, 123, 157);"><div class="selector" style="width: 122px; height: 102px; padding: 3px; background-color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 3px;"><div class="field-knob" style="position: absolute; width: 12px; height: 12px; border: 2px solid rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px; border-radius: 12px; z-index: 1; margin-left: 52.8726px; margin-top: 31.4314px; background-color: rgb(63, 123, 157);"></div><div class="saturation-field" style="width: 100px; height: 100px; border: 1px solid rgb(85, 85, 85); margin-right: 3px; display: inline-block; cursor: pointer; background: -webkit-linear-gradient(left, rgb(255, 255, 255) 0%, rgb(0, 162, 255) 100%);"><div style="width: 100%; height: 100%; background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 100%);"></div></div><div class="hue-field" style="width: 15px; height: 100px; border: 1px solid rgb(85, 85, 85); cursor: ns-resize; position: absolute; top: 3px; right: 3px; background: -webkit-linear-gradient(top, rgb(255, 0, 0) 0%, rgb(255, 0, 255) 17%, rgb(0, 0, 255) 34%, rgb(0, 255, 255) 50%, rgb(0, 255, 0) 67%, rgb(255, 255, 0) 84%, rgb(255, 0, 0) 100%);"><div class="hue-knob" style="position: absolute; width: 15px; height: 2px; border-right: 4px solid rgb(255, 255, 255); z-index: 1; margin-top: 43.9716px;"></div></div></div></div></div></li></ul></div></li></ul></div></li><li class="folder"><div class="dg"><ul class="closed"><li class="title">THREE.Material</li><li class="cr boolean"><div><span class="property-name">transparent</span><div class="c"><input type="checkbox"></div></div></li><li class="cr number has-slider"><div><span class="property-name">opacity</span><div class="c"><div><input type="text"></div><div class="slider"><div class="slider-fg" style="width: 100%;"></div></div></div></div></li><li class="cr boolean"><div><span class="property-name">depthTest</span><div class="c"><input type="checkbox" checked="checked"></div></div></li><li class="cr boolean"><div><span class="property-name">depthWrite</span><div class="c"><input type="checkbox" checked="checked"></div></div></li><li class="cr number has-slider"><div><span class="property-name">alphaTest</span><div class="c"><div><input type="text"></div><div class="slider"><div class="slider-fg" style="width: 0%;"></div></div></div></div></li><li class="cr boolean"><div><span class="property-name">visible</span><div class="c"><input type="checkbox" checked="checked"></div></div></li><li class="cr number"><div><span class="property-name">side</span><div class="c"><select><option value="0">THREE.FrontSide</option><option value="1">THREE.BackSide</option><option value="2">THREE.DoubleSide</option></select></div></div></li></ul></div></li><li class="folder"><div class="dg"><ul><li class="title">THREE.MeshBasicMaterial</li><li class="cr color"><div><span class="property-name">color</span><div class="c"><input type="text" style="outline: none; text-align: center; color: rgb(0, 0, 0); border: 0px; font-weight: bold; text-shadow: rgba(255, 255, 255, 0.7) 0px 1px 1px; background-color: rgb(207, 194, 204);"><div class="selector" style="width: 122px; height: 102px; padding: 3px; background-color: rgb(34, 34, 34); box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 3px;"><div class="field-knob" style="position: absolute; width: 12px; height: 12px; border: 2px solid rgb(0, 0, 0); box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 3px; border-radius: 12px; z-index: 1; margin-left: -0.719363px; margin-top: 11.6275px; background-color: rgb(207, 194, 204);"></div><div class="saturation-field" style="width: 100px; height: 100px; border: 1px solid rgb(85, 85, 85); margin-right: 3px; display: inline-block; cursor: pointer; background: -webkit-linear-gradient(left, rgb(255, 255, 255) 0%, rgb(255, 0, 195) 100%);"><div style="width: 100%; height: 100%; background: -webkit-linear-gradient(top, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 100%);"></div></div><div class="hue-field" style="width: 15px; height: 100px; border: 1px solid rgb(85, 85, 85); cursor: ns-resize; position: absolute; top: 3px; right: 3px; background: -webkit-linear-gradient(top, rgb(255, 0, 0) 0%, rgb(255, 0, 255) 17%, rgb(0, 0, 255) 34%, rgb(0, 255, 255) 50%, rgb(0, 255, 0) 67%, rgb(255, 255, 0) 84%, rgb(255, 0, 0) 100%);"><div class="hue-knob" style="position: absolute; width: 15px; height: 2px; border-right: 4px solid rgb(255, 255, 255); z-index: 1; margin-top: 12.7451px;"></div></div></div></div></div></li><li class="cr boolean"><div><span class="property-name">wireframe</span><div class="c"><input type="checkbox"></div></div></li><li class="cr number has-slider"><div><span class="property-name">wireframeLinewidth</span><div class="c"><div><input type="text"></div><div class="slider"><div class="slider-fg" style="width: 10%;"></div></div></div></div></li><li class="cr number"><div><span class="property-name">vertexColors</span><div class="c"><select><option value="0">THREE.NoColors</option><option value="1">THREE.FaceColors</option><option value="2">THREE.VertexColors</option></select></div></div></li><li class="cr boolean"><div><span class="property-name">fog</span><div class="c"><input type="checkbox" checked="checked"></div></div></li><li class="cr object"><div><span class="property-name">envMaps</span><div class="c"><select><option value="none">none</option><option value="reflection">reflection</option><option value="refraction">refraction</option></select></div></div></li><li class="cr object"><div><span class="property-name">map</span><div class="c"><select><option value="none">none</option><option value="grass">grass</option></select></div></div></li><li class="cr object"><div><span class="property-name">specularMap</span><div class="c"><select><option value="none">none</option><option value="grass">grass</option></select></div></div></li><li class="cr object"><div><span class="property-name">alphaMap</span><div class="c"><select><option value="none">none</option><option value="grass">grass</option></select></div></div></li><li class="cr boolean"><div><span class="property-name">morphTargets</span><div class="c"><input type="checkbox"></div></div></li><li class="cr number"><div><span class="property-name">combine</span><div class="c"><select><option value="0">THREE.MultiplyOperation</option><option value="1">THREE.MixOperation</option><option value="2">THREE.AddOperation</option></select></div></div></li><li class="cr number has-slider"><div><span class="property-name">reflectivity</span><div class="c"><div><input type="text"></div><div class="slider"><div class="slider-fg" style="width: 69.9293%;"></div></div></div></div></li><li class="cr number has-slider"><div><span class="property-name">refractionRatio</span><div class="c"><div><input type="text"></div><div class="slider"><div class="slider-fg" style="width: 58.9006%;"></div></div></div></div></li></ul></div></li></ul><div class="close-button" style="width: 245px;">Close Controls</div></div></div><canvas width="1174" height="938" style="width: 1174px; height: 938px;"></canvas>
+	
+
+</body></html>

@@ -1,0 +1,108 @@
+
+<!-- saved from url=(0034)http://nodeca.github.io/glur/demo/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./demo_files/jquery.min.js"></script>
+<script src="./demo_files/lodash.min.js"></script>
+<script src="./demo_files/image-encoded.js"></script>
+
+<style>
+    canvas {
+        box-shadow: 0 0 1px #444;
+        max-width: 500px;
+    }
+
+    #slider {
+        width: 500px;
+        margin: 0;
+    }
+
+    #amount {
+        border: 0;
+        color: #f6931f;
+        font-weight: bold;
+    }
+</style>
+
+</head><body><p>
+    Blurred (<span id="dst-info">3264 x 2448</span>):<br>
+    <canvas id="dst" title="Click to select image" width="3264" height="2448"></canvas>
+    <br><br>
+    <label for="amount">Blur radius:</label>
+    <input type="text" id="amount" readonly=""><br>
+    <input id="slider" type="range" value="10" name="radius" min="0" max="100">
+</p>
+
+<input id="upload" type="file" style="position: absolute; left: -2000px">
+
+<script>// Stub to run node module without browserification
+    var module = {};
+</script>
+
+<script src="./demo_files/index.js"></script>
+
+<script>
+    var lastRadius,
+        img = new Image();
+
+    img.src = imageEncoded;
+
+    var fastBlurCanvas = _.debounce(function (radius) {
+        // Quick check if radius changed.
+        if (radius === lastRadius) { return; }
+        lastRadius = radius;
+
+        var dst = $('#dst')[0],
+            ctx = dst.getContext('2d');
+
+        ctx.drawImage(img, 0, 0);
+
+        var imageData = ctx.getImageData(0, 0, dst.width, dst.height);
+
+        var start = performance.now();
+
+        module.exports(imageData.data, dst.width, dst.height, radius);
+
+        ctx.putImageData(imageData, 0, 0);
+
+        $('#amount').val(radius + ' (' + (performance.now() - start).toFixed(2) + 'ms)');
+    }, 200);
+
+    img.onload = function () {
+        var dst, ctx;
+
+        dst = $('#dst')[0];
+        dst.width = img.width;
+        dst.height = img.height;
+
+        $('#dst-info').text(img.width + ' x ' + img.height);
+
+        ctx = dst.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        lastRadius = -Infinity;
+
+        fastBlurCanvas(Number($('#slider').val()));
+    };
+
+    $(function () {
+        $('#slider').on('change input', function () {
+            var radius = Number($('#slider').val());
+            $('#amount').val(radius);
+            fastBlurCanvas(radius);
+        });
+
+        $('#amount').val(Number($('#slider').val()));
+    });
+
+    $('#dst').on('click', function () {
+        $('#upload').trigger('click');
+    });
+
+    $('#upload').on('change', function () {
+        var files = $(this)[0].files;
+
+        if (files.length === 0) { return; }
+
+        img.src = window.URL.createObjectURL(files[0]);
+    });
+
+</script></body></html>
