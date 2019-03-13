@@ -217,14 +217,9 @@
       }
     }
 	function resimURLdenYukle()
-    {
-
-      var fileInput = evt.target.files;
-      if(fileInput.length>0){
-          //get the file
-          //window url
-          var windowURL = window.URL || window.webkitURL;
-          photo = new Image();
+    {     
+          //get the file      
+          var photo = new Image();
           photo.onload = function(){
                               console.log("alınan foto boyut: ", photo.width, "  ", photo.height);
                               fotograftanYukle(photo);
@@ -232,9 +227,7 @@
 
                             };
 	      var urlinput = document.querySelector('#resimURL');             
-          photo.src = urlinput.value;         
-          
-      }
+          photo.src = urlinput.value;      
     }
     function fotograftanYukle(resim)
     {
