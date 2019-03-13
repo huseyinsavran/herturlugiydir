@@ -37,10 +37,10 @@
 					<input type="url" id="resimURL" accept="image/*" >
 					<input type="button" value="Yükle" accept="image/*" onclick="resimURLdenYukle()">
 				</div>
-              <canvas id="output" style="display:inline;"  onclick="TiklamaYoneticisi();"></canvas>
+              <canvas id="output" style="display:inline;"  onclick="TiklamaYoneticisi(event);"></canvas>
                 <!-- <img src="textures/tuyhalkagamma.png" id="birtan"/> -->
               <!--  <canvas id="output2" width="540" height="960" style="display:none;"></canvas> -->
-                <video id="fotocek" style="display:none;" autoplay onclick="TiklamaYoneticisi();"></video>
+                <video id="fotocek" style="display:none;" autoplay onclick="TiklamaYoneticisi(event);"></video>
                 <!-- <p id="timer"></p> -->
 
             </div>
@@ -316,9 +316,12 @@
 
 
     }
-    function TiklamaYoneticisi()
+    function TiklamaYoneticisi(evt)
     {
       console.log("tıklandı");
+	  
+	  
+	  
       /* tiklamaDurumu bilgileri
       * 1 ise kamera açılmalı
       * 2 ise kamera açılmış olup fotoğraf çekilir
