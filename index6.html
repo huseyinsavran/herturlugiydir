@@ -219,15 +219,17 @@
 	function resimURLdenYukle()
     {     
           //get the file      
-          photo = new Image();
-          photo.onload = function(){
-                              console.log("alınan foto boyut: ", photo.width, "  ", photo.height);
-                              fotograftanYukle(photo);
-
+        photo = new Image();
+		photo.onload = function(){
+								console.log("alınan foto boyut: ", photo.width, "  ", photo.height);
+								fotograftanYukle(photo);
+								var urlinput = document.querySelector('#resimURL');
+								urlinput.value="";
 
                             };
-	      var urlinput = document.querySelector('#resimURL');             
-          photo.src = urlinput.value;      
+	    var urlinput = document.querySelector('#resimURL');   
+		photo.crossOrigin = "Anonymous";//dışardan resimokumak için izin mekanizması          
+        photo.src = urlinput.value;      
     }
     function fotograftanYukle(resim)
     {
