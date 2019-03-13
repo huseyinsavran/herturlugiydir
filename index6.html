@@ -31,7 +31,7 @@
     <div id="container2">
         <div id="main">
             <div id="result">
-				<div style="display:none;" id="etkilesim">
+				<div style="display:grid;" id="etkilesim">
 					<input type="file" accept="image/*" onchange="resimDegisti(event)">
 					<b style="color:white;">Resim Adresi Girin</b> 
 					<input type="url" id="resimURL" accept="image/*" >
@@ -323,7 +323,7 @@
 		var divEtkilesim = document.querySelector('#etkilesim');
 		//bir daha basılırsa kapatsın
 		if(divEtkilesim.style.display == "none"){
-			divEtkilesim.style.display = "inline-flex";}
+			divEtkilesim.style.display = "grid";}
 		else {
 			EtkilesimKapat();
 		}
