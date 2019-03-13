@@ -220,7 +220,7 @@
     {     
           //get the file      
           photo = new Image();
-          photo.onloadeddata = function(){
+          photo.onload = function(){
                               console.log("alınan foto boyut: ", photo.width, "  ", photo.height);
                               fotograftanYukle(photo);
 
