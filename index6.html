@@ -31,7 +31,7 @@
     <div id="container2">
         <div id="main">
             <div id="result">
-				<div style="display:inline-block;">
+				<div style="display:none;" id="etkilesim">
 					<input type="file" accept="image/*" onchange="resimDegisti(event)">
 					<b style="color:white;">Resim Adresi Girin</b> 
 					<input type="url" id="resimURL" accept="image/*" >
@@ -214,6 +214,7 @@
 
           }
           reader.readAsDataURL(fileInput[0]);
+		  EtkilesimKapat();
       }
     }
 	function resimURLdenYukle()
@@ -229,7 +230,8 @@
                             };
 	    var urlinput = document.querySelector('#resimURL');   
 		photo.crossOrigin = "Anonymous";//dışardan resimokumak için izin mekanizması          
-        photo.src = urlinput.value;      
+        photo.src = urlinput.value;   
+		EtkilesimKapat();
     }
     function fotograftanYukle(resim)
     {
@@ -316,11 +318,33 @@
 
 
     }
+	function EtkilesimAc()
+	{
+		var divEtkilesim = document.querySelector('#etkilesim');
+		//bir daha basılırsa kapatsın
+		if(divEtkilesim.style.display == "none"){
+			divEtkilesim.style.display = "inline-flex";}
+		else {
+			EtkilesimKapat();
+		}
+		 
+	}
+	function EtkilesimKapat()
+	{
+		var divEtkilesim = document.querySelector('#etkilesim');
+		divEtkilesim.style.display = "none";
+		 
+	}
     function TiklamaYoneticisi(evt)
     {
       console.log("tıklandı");
-	  
-	  
+	  var outPutCanvas = document.querySelector('#output');
+	  var farePos = getMousePos(outPutCanvas, evt) ;
+	  if(farePos.y <= (renderHeight/10)
+	  {
+			EtkilesimAc();
+			return;
+	  }
 	  
       /* tiklamaDurumu bilgileri
       * 1 ise kamera açılmalı
@@ -403,7 +427,13 @@
       tiklamaDurumu = 1;
     }
 
-
+	function getMousePos(canvas, event) {
+		var rect = canvas.getBoundingClientRect();
+		return {
+			x: event.clientX - rect.left,
+			y: event.clientY - rect.top
+		};
+	}
 
 
 
