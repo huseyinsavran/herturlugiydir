@@ -1,3 +1,3 @@
-# Hüseyi Savran
-tekstil sektörü için sanal veya artırılmış gerçeklik çözümleri
+# Hüseyin Savran
+Tekstil sektörü için sanal veya artırılmış gerçeklik çözümleri
 
